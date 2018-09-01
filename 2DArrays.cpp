@@ -47,7 +47,7 @@ bool d2DArray::solveL(double *B, double*X){
     for(int i=1; i<rows; i++){
         if(fabs(A[i][i])<1e-8) return false;
         X[i]=B[i];
-        double aux;
+        double aux=0;
         for(int j=0; j<i; j++){
             aux+=A[i][j]*X[j];
         }
@@ -192,7 +192,7 @@ d2DArray d2DArray::operator*(double fact){
 
 bool d2DArray::elimGaussFea(){
 	for(int i=0; i<rows-1; i++){
-		if(fabs(A[i][0])<1e-8) return false;
+		if(fabs(A[i][i])<1e-8) return false;
 		for(int j=i+1; j<rows; j++){
 			double fact=-(A[j][i]/A[i][i]);
 			addOwnRows(i, j, fact);
@@ -229,4 +229,11 @@ bool d2DArray::elimGauss(double* B, double* X){
 	toUpper();
 	bool ind=solveU(B, X);
 	return ind;
+}
+
+bool d2DArray::solve(double*B, double* X){
+	if(form=='D') return solveD(B, X);
+	if(form=='L') return solveL(B, X);
+	if(form=='U') return solveU(B, X);
+	return elimGauss(B, X);
 }

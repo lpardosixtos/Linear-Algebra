@@ -7,10 +7,10 @@ private:
 	double** A;
 	int rows, cols;
 	char form='0';
-public:
 	bool solveD(double*, double*);
 	bool solveL(double*, double*);
 	bool solveU(double*, double*);
+public:
 	d2DArray();
 	d2DArray(int, int);
 	d2DArray(int, int, char);
@@ -36,6 +36,7 @@ public:
 	bool elimGaussFea();
 	void toUpper();
 	bool elimGauss(double*, double*);
+	bool solve(double*, double*);
 
 };
 
