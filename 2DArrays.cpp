@@ -43,7 +43,8 @@ bool d2DArray::solveD(double* B, double* X){
 
 bool d2DArray::solveL(double *B, double*X){
 	if(fabs(A[0][0])<1e-8) return false;
-    X[0]=B[0]/A[0][0];
+    X[0]=B[0];
+    X[0]/=A[0][0];
     for(int i=1; i<rows; i++){
         if(fabs(A[i][i])<1e-8) return false;
         X[i]=B[i];
@@ -155,6 +156,14 @@ void d2DArray::addOwnCols(int i, int j, double fact){
 	}
 }
 
+void d2DArray::addOwnRows(int i, int j,double* B, double fact){ 
+	B[j]+=B[i]*fact;
+	for(int k=0; k<cols; k++) {
+		double aux=fact*A[i][k];
+		A[j][k]+=aux; 
+	}
+}
+
 void d2DArray::swapRows(int n, int m){
 	double* aux=A[n];
 	A[n]=A[m];
@@ -162,6 +171,27 @@ void d2DArray::swapRows(int n, int m){
 }
 
 void d2DArray::swapCols(int n, int m){
+	double aux;
+	for(int i=0; i<rows; i++){
+		aux=A[i][n];
+		A[i][n]=A[i][m];
+		A[i][m]=aux;
+	}
+}
+
+void d2DArray::swapRows(int n, int m, double* B){
+	double aux1=B[n];
+	B[n]=B[m];
+	B[m]=aux1;
+	double* aux=A[n];
+	A[n]=A[m];
+	A[m]=aux;
+}
+
+void d2DArray::swapCols(int n, int m, int* pos){
+	int auxint=pos[n];
+	pos[n]=pos[m];
+	pos[m]=auxint;
 	double aux;
 	for(int i=0; i<rows; i++){
 		aux=A[i][n];
@@ -190,15 +220,15 @@ d2DArray d2DArray::operator*(double fact){
 	return *C;
 }
 
-bool d2DArray::elimGaussFea(){
+bool d2DArray::elimGaussFea(double* B, double* X){
 	for(int i=0; i<rows-1; i++){
 		if(fabs(A[i][i])<1e-8) return false;
 		for(int j=i+1; j<rows; j++){
 			double fact=-(A[j][i]/A[i][i]);
-			addOwnRows(i, j, fact);
+			addOwnRows(i, j, B, fact);
 		}
 	}
-	return true;
+	return solveU(B, X);
 }
 
 void d2DArray::toUpper(){
@@ -225,9 +255,36 @@ void d2DArray::toUpper(){
 	}
 }
 
+void d2DArray::toUpper(double* B, int* pos){
+	for(int i=0; i<rows-1; i++){
+		int indexR=i, indexC=i;
+		double auxMax=fabs(A[i][i]);
+		for(int k=i; k<rows; k++){
+			for(int l=i; l<cols; l++){
+				if(fabs(A[k][l])>auxMax){
+					auxMax=fabs(A[k][l]);
+					indexR=k;
+					indexC=l;
+				}
+			}
+		}
+		swapRows(i, indexR, B);
+		swapCols(i, indexC, pos);
+		if(fabs(A[i][i])<1e-8) break;
+		for(int j=i+1; j<rows; j++){
+			double fact=-(A[j][i]/A[i][i]);
+			addOwnRows(i, j, B, fact);
+		}
+	}
+}
+
 bool d2DArray::elimGauss(double* B, double* X){
-	toUpper();
-	bool ind=solveU(B, X);
+	int pos[cols];
+	for(int i=0; i<cols; i++) pos[i]=i;
+	toUpper(B, pos);
+	double auxX[cols];
+	bool ind=solveU(B, auxX);
+	if(ind) for(int i=0; i<cols; i++) X[pos[i]]=auxX[i];
 	return ind;
 }
 
@@ -235,5 +292,8 @@ bool d2DArray::solve(double*B, double* X){
 	if(form=='D') return solveD(B, X);
 	if(form=='L') return solveL(B, X);
 	if(form=='U') return solveU(B, X);
-	return elimGauss(B, X);
+	if(pivoteo) return elimGauss(B, X);
+	return elimGaussFea(B, X);
 }
+
+void d2DArray::setpivoteo(bool ind){pivoteo=ind;};

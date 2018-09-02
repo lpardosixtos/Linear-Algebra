@@ -10,6 +10,7 @@ private:
 	bool solveD(double*, double*);
 	bool solveL(double*, double*);
 	bool solveU(double*, double*);
+	bool pivoteo;
 public:
 	d2DArray();
 	d2DArray(int, int);
@@ -22,8 +23,11 @@ public:
 	int getcols();
 	void addOwnRows(int, int, double=1);
 	void addOwnCols(int, int, double=1);
+	void addOwnRows(int, int, double*, double=1);
 	void swapRows(int, int);
 	void swapCols(int, int);
+	void swapRows(int, int, double*);
+	void swapCols(int, int, int*);
 	void multRow(int, double);
 	void multCol(int, double);
 	d2DArray copy();
@@ -33,10 +37,12 @@ public:
 	double* operator*(double*);
 	d2DArray operator*(d2DArray&);
 	d2DArray operator*(double);
-	bool elimGaussFea();
+	bool elimGaussFea(double*, double*);
 	void toUpper();
+	void toUpper(double*, int*);
 	bool elimGauss(double*, double*);
 	bool solve(double*, double*);
+	void setpivoteo(bool);
 
 };
 
