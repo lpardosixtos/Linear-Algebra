@@ -84,17 +84,17 @@ int d2DArray::getrows(){ return rows;}
 
 int d2DArray::getcols(){ return cols;}
 
-d2DArray d2DArray::copy(){
+d2DArray* d2DArray::copy(){
 	d2DArray *C=new d2DArray(rows, cols);
 	for(int i=0; i<rows; i++){
 		for(int j=0; j<cols; j++){
 			(*C)[i][j]=A[i][j];
 		}
 	}
-	return *C;
+	return C;
 }
 
-d2DArray d2DArray::operator+(d2DArray &B){
+d2DArray* d2DArray::operator+(d2DArray &B){
 	int r=B.getrows();
 	int c=B.getcols();
 	d2DArray *C=new d2DArray(r, c);
@@ -103,10 +103,10 @@ d2DArray d2DArray::operator+(d2DArray &B){
 			(*C)[i][j]=A[i][j]+B[i][j];
 		}
 	}
-	return *C;
+	return C;
 }
 
-d2DArray d2DArray::operator-(d2DArray &B){
+d2DArray* d2DArray::operator-(d2DArray &B){
 	int r=B.getrows();
 	int c=B.getcols();
 	d2DArray *C=new d2DArray(r, c);
@@ -115,7 +115,7 @@ d2DArray d2DArray::operator-(d2DArray &B){
 			(*C)[i][j]=A[i][j]-B[i][j];
 		}
 	}
-	return *C;
+	return C;
 }
 
 double* d2DArray::operator*(double* v){
@@ -129,7 +129,7 @@ double* d2DArray::operator*(double* v){
 	return aux;
 }
 
-d2DArray d2DArray::operator*(d2DArray &B){
+d2DArray* d2DArray::operator*(d2DArray &B){
 	int r=B.getrows(), c=B.getcols();
 	d2DArray* C=new d2DArray(rows,c);
 	for(int k=0; k<c; k++){
@@ -140,7 +140,7 @@ d2DArray d2DArray::operator*(d2DArray &B){
 			}
 		}
 	}
-	return *C;
+	return C;
 }
 
 void d2DArray::addOwnRows(int i, int j, double fact){ 

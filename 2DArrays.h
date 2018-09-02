@@ -30,12 +30,12 @@ public:
 	void swapCols(int, int, int*);
 	void multRow(int, double);
 	void multCol(int, double);
-	d2DArray copy();
+	d2DArray* copy();
 	double*& operator[](int);
-	d2DArray operator+(d2DArray&);
-	d2DArray operator-(d2DArray&);
+	d2DArray* operator+(d2DArray&);
+	d2DArray* operator-(d2DArray&);
 	double* operator*(double*);
-	d2DArray operator*(d2DArray&);
+	d2DArray* operator*(d2DArray&);
 	d2DArray operator*(double);
 	bool elimGaussFea(double*, double*);
 	void toUpper();
