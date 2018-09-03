@@ -74,15 +74,82 @@ bool d2DArray::solveU(double *B, double*X){
     return true;
 }
 
+
 void d2DArray::setform(char f){ form=f;}
 
 char d2DArray::getform(){return form;}
 
-double*& d2DArray::operator[]( int d1) { return A[d1];}
-
 int d2DArray::getrows(){ return rows;}
 
 int d2DArray::getcols(){ return cols;}
+
+void d2DArray::addOwnRows(int i, int j, double fact){ 
+	for(int k=0; k<cols; k++) {
+		double aux=fact*A[i][k];
+		A[j][k]+=aux; 
+	}
+}
+void d2DArray::addOwnCols(int i, int j, double fact){ 
+	for(int k=0; k<rows; k++){
+		double aux=fact*A[k][i];
+		A[k][j]+=aux; 
+	}
+}
+
+void d2DArray::addOwnRows(int i, int j,double* B, double fact){ 
+	B[j]+=B[i]*fact;//También se altera el valor del vector objetivo
+	for(int k=0; k<cols; k++) {
+		double aux=fact*A[i][k];
+		A[j][k]+=aux; 
+	}
+}
+
+void d2DArray::swapRows(int n, int m){
+	double* aux=A[n];
+	A[n]=A[m];
+	A[m]=aux;
+}
+
+void d2DArray::swapCols(int n, int m){
+	double aux;
+	for(int i=0; i<rows; i++){
+		aux=A[i][n];
+		A[i][n]=A[i][m];
+		A[i][m]=aux;
+	}
+}
+
+void d2DArray::swapRows(int n, int m, double* B){
+	double aux1=B[n];//También se alteran las posiciones del vector objetivo
+	B[n]=B[m];
+	B[m]=aux1;
+	double* aux=A[n];
+	A[n]=A[m];
+	A[m]=aux;
+}
+
+void d2DArray::swapCols(int n, int m, int* pos){
+	int auxint=pos[n];//Se tiene que llevar el estado actual de las posiciones del vector solución
+	pos[n]=pos[m];
+	pos[m]=auxint;
+	double aux;
+	for(int i=0; i<rows; i++){
+		aux=A[i][n];
+		A[i][n]=A[i][m];
+		A[i][m]=aux;
+	}
+}
+
+void d2DArray::multRow(int n, double fact){
+	for(int i=0; i<cols; i++){
+		A[n][i]*=fact;
+	}
+}
+void d2DArray::multCol(int n, double fact){
+	for(int i=0; i<rows; i++){
+		A[i][n]*=fact;
+	}
+}
 
 d2DArray* d2DArray::copy(){
 	d2DArray *C=new d2DArray(rows, cols);
@@ -93,6 +160,8 @@ d2DArray* d2DArray::copy(){
 	}
 	return C;
 }
+
+double*& d2DArray::operator[]( int d1) { return A[d1];}
 
 d2DArray* d2DArray::operator+(d2DArray &B){
 	int r=B.getrows();
@@ -143,73 +212,6 @@ d2DArray* d2DArray::operator*(d2DArray &B){
 	return C;
 }
 
-void d2DArray::addOwnRows(int i, int j, double fact){ 
-	for(int k=0; k<cols; k++) {
-		double aux=fact*A[i][k];
-		A[j][k]+=aux; 
-	}
-}
-void d2DArray::addOwnCols(int i, int j, double fact){ 
-	for(int k=0; k<rows; k++){
-		double aux=fact*A[k][i];
-		A[k][j]+=aux; 
-	}
-}
-
-void d2DArray::addOwnRows(int i, int j,double* B, double fact){ 
-	B[j]+=B[i]*fact;
-	for(int k=0; k<cols; k++) {
-		double aux=fact*A[i][k];
-		A[j][k]+=aux; 
-	}
-}
-
-void d2DArray::swapRows(int n, int m){
-	double* aux=A[n];
-	A[n]=A[m];
-	A[m]=aux;
-}
-
-void d2DArray::swapCols(int n, int m){
-	double aux;
-	for(int i=0; i<rows; i++){
-		aux=A[i][n];
-		A[i][n]=A[i][m];
-		A[i][m]=aux;
-	}
-}
-
-void d2DArray::swapRows(int n, int m, double* B){
-	double aux1=B[n];
-	B[n]=B[m];
-	B[m]=aux1;
-	double* aux=A[n];
-	A[n]=A[m];
-	A[m]=aux;
-}
-
-void d2DArray::swapCols(int n, int m, int* pos){
-	int auxint=pos[n];
-	pos[n]=pos[m];
-	pos[m]=auxint;
-	double aux;
-	for(int i=0; i<rows; i++){
-		aux=A[i][n];
-		A[i][n]=A[i][m];
-		A[i][m]=aux;
-	}
-}
-
-void d2DArray::multRow(int n, double fact){
-	for(int i=0; i<cols; i++){
-		A[n][i]*=fact;
-	}
-}
-void d2DArray::multCol(int n, double fact){
-	for(int i=0; i<rows; i++){
-		A[i][n]*=fact;
-	}
-}
 d2DArray d2DArray::operator*(double fact){
 	d2DArray* C=new d2DArray(rows,cols);
 	for(int i=0; i<rows; i++){
@@ -222,7 +224,7 @@ d2DArray d2DArray::operator*(double fact){
 
 bool d2DArray::elimGaussFea(double* B, double* X){
 	for(int i=0; i<rows-1; i++){
-		if(fabs(A[i][i])<1e-8) return false;
+		if(fabs(A[i][i])<1e-8) return false;//Si se encuentra un valor 0 no puede continuar
 		for(int j=i+1; j<rows; j++){
 			double fact=-(A[j][i]/A[i][i]);
 			addOwnRows(i, j, B, fact);
@@ -258,7 +260,7 @@ void d2DArray::toUpper(){
 void d2DArray::toUpper(double* B, int* pos){
 	for(int i=0; i<rows-1; i++){
 		int indexR=i, indexC=i;
-		double auxMax=fabs(A[i][i]);
+		double auxMax=fabs(A[i][i]);//Se calcula el máximo para reducir posibles error numéricos
 		for(int k=i; k<rows; k++){
 			for(int l=i; l<cols; l++){
 				if(fabs(A[k][l])>auxMax){
@@ -268,7 +270,7 @@ void d2DArray::toUpper(double* B, int* pos){
 				}
 			}
 		}
-		swapRows(i, indexR, B);
+		swapRows(i, indexR, B);//Las operaciones de cambio toman en cuenta los vectores objetivo y solución
 		swapCols(i, indexC, pos);
 		if(fabs(A[i][i])<1e-8) break;
 		for(int j=i+1; j<rows; j++){
@@ -283,12 +285,12 @@ bool d2DArray::elimGauss(double* B, double* X){
 	for(int i=0; i<cols; i++) pos[i]=i;
 	toUpper(B, pos);
 	double auxX[cols];
-	bool ind=solveU(B, auxX);
+	bool ind=solveU(B, auxX);//El éxito del método depende del éxito del método solveU
 	if(ind) for(int i=0; i<cols; i++) X[pos[i]]=auxX[i];
 	return ind;
 }
 
-bool d2DArray::solve(double*B, double* X){
+bool d2DArray::solve(double*B, double* X){//Manda a llamar al método correspondiente, no se pueden llamar individualmente
 	if(form=='D') return solveD(B, X);
 	if(form=='L') return solveL(B, X);
 	if(form=='U') return solveU(B, X);
