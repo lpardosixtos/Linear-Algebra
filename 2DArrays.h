@@ -26,7 +26,7 @@ public:
 	void addOwnRows(int, int, double*, double=1);//Suma un renglón multiplicado por un factor a otro renglón, en la matriz extendida
 	void swapRows(int, int);//Intercambia dos renglones
 	void swapCols(int, int);//Intercambia dos columnas
-	void swapRows(int, int, double*);//Intercambia dos renglones de la matriz extendida
+	void swapRows(int, int, double*);//Intercambia dos renglones de la matr	iz extendida
 	void swapCols(int, int, int*);//Intercambia dos columnas de la matriz extendida, guarda los cambios del vector solución
 	void multRow(int, double);//Multiplica un renglón por un factor
 	void multCol(int, double);//Multiplica una columna por un factor
@@ -36,13 +36,15 @@ public:
 	d2DArray* operator-(d2DArray&);
 	double* operator*(double*);//Multiplicación por vector
 	d2DArray* operator*(d2DArray&);
-	d2DArray operator*(double);
+	d2DArray* operator*(double);
 	bool elimGaussFea(double*, double*);//Eliminación Gaussiana sin pivoteo
 	void toUpper();//Convierte a matriz triangular superior
 	void toUpper(double*, int*);//Convierte la matriz extendida a triangular superior
 	bool elimGauss(double*, double*);//Eliminación Gaussiana con pivoteo
 	bool solve(double*, double*);//Resuelve el sistema, internamente depende del tipo
 	void setpivoteo(bool);//Cambia el valor pivoteo
+	void transpose();
+	bool choleskyFact(d2DArray&, d2DArray&);
 
 };
 

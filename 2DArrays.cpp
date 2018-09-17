@@ -1,8 +1,10 @@
-#include "2Darrays.h"
+#include "2DArrays.h"
 #include <iostream>
 #include <cmath>
 
-d2DArray::d2DArray(){}
+d2DArray::d2DArray(){
+	rows=-1;
+}
 
 d2DArray::d2DArray(int r, int c){
 	rows=r;
@@ -19,7 +21,7 @@ d2DArray::d2DArray(int r, int c, char f){
 }
 
 bool d2DArray::setShape(int r, int c){
-	if(rows==-1) return false;
+	if(rows!=-1) return false;
 	rows=r;
 	cols=c;
 	A=new double* [r];
@@ -83,24 +85,24 @@ int d2DArray::getrows(){ return rows;}
 
 int d2DArray::getcols(){ return cols;}
 
-void d2DArray::addOwnRows(int i, int j, double fact){ 
+void d2DArray::addOwnRows(int i, int j, double fact){
 	for(int k=0; k<cols; k++) {
 		double aux=fact*A[i][k];
-		A[j][k]+=aux; 
+		A[j][k]+=aux;
 	}
 }
-void d2DArray::addOwnCols(int i, int j, double fact){ 
+void d2DArray::addOwnCols(int i, int j, double fact){
 	for(int k=0; k<rows; k++){
 		double aux=fact*A[k][i];
-		A[k][j]+=aux; 
+		A[k][j]+=aux;
 	}
 }
 
-void d2DArray::addOwnRows(int i, int j,double* B, double fact){ 
+void d2DArray::addOwnRows(int i, int j,double* B, double fact){
 	B[j]+=B[i]*fact;//También se altera el valor del vector objetivo
 	for(int k=0; k<cols; k++) {
 		double aux=fact*A[i][k];
-		A[j][k]+=aux; 
+		A[j][k]+=aux;
 	}
 }
 
@@ -212,14 +214,14 @@ d2DArray* d2DArray::operator*(d2DArray &B){
 	return C;
 }
 
-d2DArray d2DArray::operator*(double fact){
+d2DArray* d2DArray::operator*(double fact){
 	d2DArray* C=new d2DArray(rows,cols);
 	for(int i=0; i<rows; i++){
 		for(int j=0; j<cols; j++){
 			(*C)[i][j]=A[i][j]*fact;
 		}
 	}
-	return *C;
+	return C;
 }
 
 bool d2DArray::elimGaussFea(double* B, double* X){
@@ -252,7 +254,7 @@ void d2DArray::toUpper(){
 		for(int j=i+1; j<rows; j++){
 			double fact=-(A[j][i]/A[i][i]);
 			addOwnRows(i, j, fact);
-		
+
 		}
 	}
 }
@@ -299,3 +301,45 @@ bool d2DArray::solve(double*B, double* X){//Manda a llamar al método correspond
 }
 
 void d2DArray::setpivoteo(bool ind){pivoteo=ind;};
+
+void d2DArray::transpose(){
+	double aux;
+	if(form=='L') form='U';
+	else if(form=='U') form='L';
+	for(int i=0; i<rows; i++){
+		for(int j=0; j<i; j++){
+			aux=A[i][j];
+			A[i][j]=A[j][i];
+			A[j][i]=aux;
+		}
+	}
+}
+
+bool d2DArray::choleskyFact(d2DArray& L, d2DArray& D){
+	L.setShape(rows, cols);
+	for(int i=0; i<rows; i++){
+		L[i][i]=1;
+		for(int j=0; j<i; j++){
+			D[i][j]=0;
+			D[j][i]=0;
+			if(A[i][j]!= A[j][i] || fabs(D[j][j])<1e-8) return false;
+			else{
+				L[j][i]=0;
+				L[i][j]=0;
+				for(int k=0; k<j; k++){
+					double prod;
+					prod=L[i][k]*D[k][k]*L[j][k];
+					L[i][j]+=prod;
+				}
+				L[i][j]=A[i][j]-L[i][j];
+				L[i][j]/=D[j][j];
+			}
+		}
+		D[i][i]=0;
+		for(int j=0; j<i; j++){
+			D[i][i]+=D[j][j]*L[i][j]*L[i][j];
+		}
+		D[i][i]=A[i][i]-D[i][i];
+	}
+	return true;
+}
