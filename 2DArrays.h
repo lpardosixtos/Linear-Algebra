@@ -21,6 +21,7 @@ public:
 	char getform();//Devuelve el parámetro form
 	int getrows();//Devuelve el parámetro rows
 	int getcols();//Devuelve el parámetro cols
+	void print();//Imprime la matriz
 	void addOwnRows(int, int, double=1);//Suma un renglón multiplicado por un factor a otro renglón
 	void addOwnCols(int, int, double=1);//Suma una columna multiplicada por un factor a otra columna
 	void addOwnRows(int, int, double*, double=1);//Suma un renglón multiplicado por un factor a otro renglón, en la matriz extendida
@@ -43,8 +44,10 @@ public:
 	bool elimGauss(double*, double*);//Eliminación Gaussiana con pivoteo
 	bool solve(double*, double*);//Resuelve el sistema, internamente depende del tipo
 	void setpivoteo(bool);//Cambia el valor pivoteo
-	void transpose();
-	bool choleskyFact(d2DArray&, d2DArray&);
+
+	//Estos son los dos métodos nuevos
+	void transpose();//Convierte una matriz en su transpuesta
+	bool choleskyFact(d2DArray&, d2DArray&);//Ejecuta la factorización de Cholesky
 
 };
 

@@ -2,6 +2,8 @@
 #include <iostream>
 #include <cmath>
 
+//Los métodos nuevos están al final
+
 d2DArray::d2DArray(){
 	rows=-1;
 }
@@ -84,6 +86,14 @@ char d2DArray::getform(){return form;}
 int d2DArray::getrows(){ return rows;}
 
 int d2DArray::getcols(){ return cols;}
+
+void d2DArray::print(){
+	for(int i=0; i<rows; i++){
+		std::cout << A[i][0];
+		for(int j=1; j<cols; j++) std::cout << " " << A[i][j];
+		std::cout << "\n";
+	}
+}
 
 void d2DArray::addOwnRows(int i, int j, double fact){
 	for(int k=0; k<cols; k++) {
@@ -302,8 +312,11 @@ bool d2DArray::solve(double*B, double* X){//Manda a llamar al método correspond
 
 void d2DArray::setpivoteo(bool ind){pivoteo=ind;};
 
+//Los siguientes dos métodos son nuevos
+
 void d2DArray::transpose(){
 	double aux;
+	//Si la matriz tenía una forma dada también la cambia
 	if(form=='L') form='U';
 	else if(form=='U') form='L';
 	for(int i=0; i<rows; i++){
@@ -318,13 +331,13 @@ void d2DArray::transpose(){
 bool d2DArray::choleskyFact(d2DArray& L, d2DArray& D){
 	L.setShape(rows, cols);
 	for(int i=0; i<rows; i++){
-		L[i][i]=1;
+		L[i][i]=1; //Llena la diagonal de unos
 		for(int j=0; j<i; j++){
 			D[i][j]=0;
 			D[j][i]=0;
-			if(A[i][j]!= A[j][i] || fabs(D[j][j])<1e-8) return false;
+			if(A[i][j]!= A[j][i] || fabs(D[j][j])<1e-8) return false; //Si la matriz no es simétrica o se divide entre 0 no se puede seguir
 			else{
-				L[j][i]=0;
+				L[j][i]=0;//Llena de ceros los elementos del triángulo superior
 				L[i][j]=0;
 				for(int k=0; k<j; k++){
 					double prod;
