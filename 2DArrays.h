@@ -46,7 +46,7 @@ public:
 	void setpivoteo(bool);//Cambia el valor pivoteo
 	void transpose();//Convierte una matriz en su transpuesta
 	bool choleskyFact(d2DArray&, d2DArray&);//Ejecuta la factorización de Cholesky
-	bool GaussSiedel();
+	bool GaussSiedel(double*, double*, int);
 
 };
 

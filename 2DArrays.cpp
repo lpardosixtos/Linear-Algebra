@@ -1,4 +1,5 @@
 #include "2DArrays.h"
+#include "norms.h"
 #include <iostream>
 #include <cmath>
 
@@ -354,5 +355,37 @@ bool d2DArray::choleskyFact(d2DArray& L, d2DArray& D){
 		}
 		D[i][i]=A[i][i]-D[i][i];
 	}
+	return true;
+}
+
+bool d2DArray::GaussSiedel(double*b, double*x, int iters){
+	double* errorVect=new double[cols];
+	double* xlast=new double[cols];
+	xlast[0]=1;
+	for(int i=0; i<cols; i++) xlast[i]=0;
+	double error;
+	int cont=0;
+	xlast[0]=1;
+	do{
+		for(int i=0; i<cols; i++){
+			double sum=0;
+			if(A[i][i]<1e-8) return false;
+			for(int j=0; j<i; j++){
+				sum+=A[j][i]*x[j];
+			}
+			for(int j=i+1; j<cols; j++){
+				sum+=A[i][j]*xlast[j];
+			}
+			x[i]=(b[i]-sum)/A[i][i];
+		}
+		delete[] errorVect;
+		errorVect=this->operator*(x);
+		for(int i=0; i<cols; i++) errorVect[i]-=b[i];
+		error=norm_1(errorVect, cols);
+		double* auxPoint=xlast;
+		xlast=x;
+		x=auxPoint;
+		cont++;
+	}while(error>1e-5 && cont<iters);
 	return true;
 }
