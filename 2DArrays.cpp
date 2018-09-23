@@ -360,18 +360,46 @@ bool d2DArray::choleskyFact(d2DArray& L, d2DArray& D){
 
 bool d2DArray::GaussSiedel(double*b, double*x, int iters){
 	double* errorVect=new double[cols];
-	double* xlast=new double[cols];
-	xlast[0]=1;
-	for(int i=0; i<cols; i++) xlast[i]=0;
 	double error;
 	int cont=0;
-	xlast[0]=1;
+	for(int i=1; i<cols; i++) x[i]=0;
+	x[0]=1;
 	do{
 		for(int i=0; i<cols; i++){
 			double sum=0;
 			if(A[i][i]<1e-8) return false;
 			for(int j=0; j<i; j++){
-				sum+=A[j][i]*x[j];
+				sum+=A[i][j]*x[j];
+			}
+			for(int j=i+1; j<cols; j++){
+				sum+=A[i][j]*x[j];
+			}
+			x[i]=(b[i]-sum)/A[i][i];
+		}
+		delete[] errorVect;
+		errorVect=this->operator*(x);
+		for(int i=0; i<cols; i++) errorVect[i]-=b[i];
+		error=norm_1(errorVect, cols);
+		cont++;
+	}while(error>1e-5 && cont<iters);
+	std::cout << cont << "\n";
+	delete[] errorVect;
+	return true;
+}
+
+bool d2DArray::Jacobi(double*b, double*x, int iters){
+	double* errorVect=new double[cols];
+	double error;
+	int cont=0;
+	double* xlast=new double[cols];
+	for(int i=0; i<cols; i++) xlast[i]=0;
+	xlast[cols-1]=1;
+	do{
+		for(int i=0; i<cols; i++){
+			double sum=0;
+			if(A[i][i]<1e-8) return false;
+			for(int j=0; j<i; j++){
+				sum+=A[i][j]*xlast[j];
 			}
 			for(int j=i+1; j<cols; j++){
 				sum+=A[i][j]*xlast[j];
@@ -387,5 +415,6 @@ bool d2DArray::GaussSiedel(double*b, double*x, int iters){
 		x=auxPoint;
 		cont++;
 	}while(error>1e-5 && cont<iters);
+	delete[] errorVect;
 	return true;
 }
