@@ -44,10 +44,9 @@ public:
 	bool elimGauss(double*, double*);//Eliminación Gaussiana con pivoteo
 	bool solve(double*, double*);//Resuelve el sistema, internamente depende del tipo
 	void setpivoteo(bool);//Cambia el valor pivoteo
-
-	//Estos son los dos métodos nuevos
 	void transpose();//Convierte una matriz en su transpuesta
 	bool choleskyFact(d2DArray&, d2DArray&);//Ejecuta la factorización de Cholesky
+	bool GaussSiedel();
 
 };
 
