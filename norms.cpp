@@ -10,6 +10,14 @@ double norm_1(double* B, int sz){
 	return sum;
 }
 
+double norm_2(double* B, int sz){
+	double sum=0;
+	for(int i=0; i<sz; i++){
+		sum+=B[i]*B[i];
+	}
+	return sqrt(sum);
+}
+
 double norm_inf(double*B, int sz){
 	double maxi=0;
 	for(int i=0; i<sz; i++){

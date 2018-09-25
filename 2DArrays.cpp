@@ -379,7 +379,7 @@ bool d2DArray::GaussSiedel(double*b, double*x, int iters){
 		delete[] errorVect;
 		errorVect=this->operator*(x);
 		for(int i=0; i<cols; i++) errorVect[i]-=b[i];
-		error=norm_1(errorVect, cols);
+		error=norm_2(errorVect, cols);
 		cont++;
 	}while(error>1e-5 && cont<iters);
 	std::cout << cont << "\n";
@@ -409,7 +409,7 @@ bool d2DArray::Jacobi(double*b, double*x, int iters){
 		delete[] errorVect;
 		errorVect=this->operator*(x);
 		for(int i=0; i<cols; i++) errorVect[i]-=b[i];
-		error=norm_1(errorVect, cols);
+		error=norm_2(errorVect, cols);
 		double* auxPoint=xlast;
 		xlast=x;
 		x=auxPoint;
