@@ -215,11 +215,12 @@ d2DArray* d2DArray::operator*(d2DArray &B){
 	int r=B.getrows(), c=B.getcols();
 	d2DArray* C=new d2DArray(rows,c);
 	for(int k=0; k<c; k++){
-		for(int i=0; i<c; i++) (*C)[i][k]=0;
-		for(int i=0; i<rows; i++){
-			for(int j=0; j<cols; j++){
-				(*C)[i][k]+=B[k][j]*A[i][k];
+		for(int i=0; i<cols; i++){
+			double sum=0;
+			for(int j=0; j<rows; j++){
+				sum+=A[i][j]*B[j][k];
 			}
+			(*C)[i][k]=sum;
 		}
 	}
 	return C;
@@ -313,7 +314,32 @@ bool d2DArray::solve(double*B, double* X){//Manda a llamar al método correspond
 
 void d2DArray::setpivoteo(bool ind){pivoteo=ind;};
 
-//Los siguientes dos métodos son nuevos
+bool d2DArray::factLU(d2DArray&L, d2DArray& U){
+	L.setShape(rows, cols);
+	U.setShape(rows, cols);
+	L.setform('L');
+	U.setform('U');
+	for(int l=0; l<rows; l++){
+		double sum=0;
+		for(int i=0; i<l; i++){
+			for(int k=0; k<i; k++) sum+=L[i][k]*U[k][l];
+			U[i][l]=A[i][l]-sum;
+			L[i][l]=0.0;
+		}
+		sum=0;
+		for(int j=0; j<l; j++){
+			for(int k=0; k<j; k++) sum+=L[l][k]*U[k][j];
+			L[l][j]=(A[l][j]-sum)/U[j][j];
+			U[l][j]=0.0;
+		}
+		sum=0;
+		for(int k=0; k<l; k++) sum+=L[l][k]*U[k][l];
+		L[l][l]=1;
+		U[l][l]=A[l][l]-sum;
+		if(U[l][l]<1e-8) return false;
+	}
+	return true;
+}
 
 void d2DArray::transpose(){
 	double aux;

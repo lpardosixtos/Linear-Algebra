@@ -48,6 +48,8 @@ public:
 	bool choleskyFact(d2DArray&, d2DArray&);//Ejecuta la factorización de Cholesky
 	bool GaussSiedel(double*, double*, int);
 	bool Jacobi(double*, double*, int);
+	bool factLU(d2DArray&, d2DArray&);
+	double biggestEigenval();
 
 };
 
