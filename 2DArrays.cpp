@@ -9,6 +9,18 @@ d2DArray::d2DArray(){
 	rows=-1;
 }
 
+d2DArray::d2DArray(std::string fileName){
+	std::ifstream fin;
+	fin.open(fileName);
+	fin >> rows >> cols;
+	A=new double* [rows];
+	for(int i=0; i<rows; i++){
+		A[i]=new double[cols];
+		for(int j=0; j<cols; j++) fin >> A[i][j];
+	}
+	fin.close();
+}
+
 d2DArray::d2DArray(int r, int c){
 	rows=r;
 	cols=c;
@@ -443,4 +455,68 @@ bool d2DArray::Jacobi(double*b, double*x, int iters){
 	}while(error>1e-5 && cont<iters);
 	delete[] errorVect;
 	return true;
+}
+
+double d2DArray::powerMax(){
+	double* xlast=new double[1], *x=new double[cols];
+	for(int i=0; i<cols; i++) x[i]=0;
+	x[0]=1;
+	double now=0;
+	double last;
+	do{
+        double aux=0;
+        for(int i=0; i<cols; i++) aux+=x[i]*x[i];
+        aux=sqrt(aux);
+        for(int i=0; i<cols; i++) x[i]/=aux;
+		delete[] xlast;
+        xlast=x;
+        x=this->operator*(x);
+        last=now;
+        now=0;
+        aux=0;
+        for(int i=0; i<cols; i++){
+            now+=x[i]*x[i];
+            aux+=xlast[i]*x[i];
+        }
+        now/=aux;
+    }while(fabs(now-last)>1e-5);
+	delete[] x;
+	delete[] xlast;
+	return now;
+}
+
+double d2DArray::powerMin(){
+	double* xlast=new double[cols], *x=new double[cols];
+	double* xlastCopy=new double[cols];
+	for(int i=0; i<cols; i++) x[i]=0;
+	x[0]=1;
+	double now=0;
+	double last;
+	do{
+        double aux=0;
+        for(int i=0; i<cols; i++) aux+=x[i]*x[i];
+        aux=sqrt(aux);
+        for(int i=0; i<cols; i++) x[i]/=aux;
+		double* auxAp=xlast;
+        xlast=x;
+		for(int i=0; i<cols; i++)xlastCopy[i]=xlast[i];
+		x=auxAp;
+		d2DArray C;
+		C=*(this->copy());
+		C.setpivoteo(true);
+        C.solve(xlastCopy, x);
+		double *xans=this->operator*(x);
+        last=now;
+        now=0;
+        aux=0;
+        for(int i=0; i<cols; i++){
+            now+=x[i]*x[i];
+            aux+=xlast[i]*x[i];
+        }
+        now/=aux;
+    }while(fabs(now-last)>1e-10);
+	delete[] x;
+	delete[] xlast;
+	delete[] xlastCopy;
+	return 1.0/now;
 }

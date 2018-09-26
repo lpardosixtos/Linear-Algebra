@@ -1,6 +1,7 @@
 #ifndef D2Arrays_H
 #define D2Arrays_H
 #include <utility>
+#include <string>
 
 class d2DArray{
 private:
@@ -13,6 +14,7 @@ private:
 	bool pivoteo;//Indica si se va a pivotear para la eliminación Gaussiana
 public:
 	d2DArray();
+	d2DArray(std::string);
 	d2DArray(int, int);//Constructor con dimensiones
 	d2DArray(int, int, char);//Constructor con dimensiones y forma
 	bool setShape(int, int);//Establece las dimensiones de una matriz sin dimensiones
@@ -49,7 +51,8 @@ public:
 	bool GaussSiedel(double*, double*, int);
 	bool Jacobi(double*, double*, int);
 	bool factLU(d2DArray&, d2DArray&);
-	double biggestEigenval();
+	double powerMax();
+	double powerMin();
 
 };
 
