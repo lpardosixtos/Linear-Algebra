@@ -51,6 +51,7 @@ public:
 	bool GaussSiedel(double*, double*, int);
 	bool Jacobi(double*, double*, int);
 	bool factLU(d2DArray&, d2DArray&);
+	bool factPLU(int*&, d2DArray&, d2DArray&);
 	double powerMax();
 	double powerMin();
 

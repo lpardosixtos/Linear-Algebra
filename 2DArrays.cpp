@@ -2,6 +2,7 @@
 #include "norms.h"
 #include <iostream>
 #include <cmath>
+#include <fstream>
 
 //Los métodos nuevos están al final
 
@@ -27,6 +28,7 @@ d2DArray::d2DArray(int r, int c){
 	A=new double* [r];
 	for(int i=0; i<r; i++) A[i]=new double[c];
 }
+
 d2DArray::d2DArray(int r, int c, char f){
 	rows=r;
 	cols=c;
@@ -91,7 +93,6 @@ bool d2DArray::solveU(double *B, double*X){
     return true;
 }
 
-
 void d2DArray::setform(char f){ form=f;}
 
 char d2DArray::getform(){return form;}
@@ -114,6 +115,7 @@ void d2DArray::addOwnRows(int i, int j, double fact){
 		A[j][k]+=aux;
 	}
 }
+
 void d2DArray::addOwnCols(int i, int j, double fact){
 	for(int k=0; k<rows; k++){
 		double aux=fact*A[k][i];
@@ -170,6 +172,7 @@ void d2DArray::multRow(int n, double fact){
 		A[n][i]*=fact;
 	}
 }
+
 void d2DArray::multCol(int n, double fact){
 	for(int i=0; i<rows; i++){
 		A[i][n]*=fact;
@@ -320,38 +323,24 @@ bool d2DArray::solve(double*B, double* X){//Manda a llamar al método correspond
 	if(form=='D') return solveD(B, X);
 	if(form=='L') return solveL(B, X);
 	if(form=='U') return solveU(B, X);
-	if(pivoteo) return elimGauss(B, X);
-	return elimGaussFea(B, X);
+	d2DArray L, U;
+	int* p;
+	this->factPLU(p,L,U);
+	double* x0=new double [L.getcols()];
+	double* b=new double [L.getrows()];
+	for(int i=0; i<rows; i++){
+		b[i]=B[p[i]];
+	}
+	bool flag=L.solve(b, x0);
+	delete[] b;
+	delete[] p;
+	if(!flag) return false;
+	flag=U.solve(x0, X);
+	delete[] x0;
+	return flag;
 }
 
 void d2DArray::setpivoteo(bool ind){pivoteo=ind;};
-
-bool d2DArray::factLU(d2DArray&L, d2DArray& U){
-	L.setShape(rows, cols);
-	U.setShape(rows, cols);
-	L.setform('L');
-	U.setform('U');
-	for(int l=0; l<rows; l++){
-		double sum=0;
-		for(int i=0; i<l; i++){
-			for(int k=0; k<i; k++) sum+=L[i][k]*U[k][l];
-			U[i][l]=A[i][l]-sum;
-			L[i][l]=0.0;
-		}
-		sum=0;
-		for(int j=0; j<l; j++){
-			for(int k=0; k<j; k++) sum+=L[l][k]*U[k][j];
-			L[l][j]=(A[l][j]-sum)/U[j][j];
-			U[l][j]=0.0;
-		}
-		sum=0;
-		for(int k=0; k<l; k++) sum+=L[l][k]*U[k][l];
-		L[l][l]=1;
-		U[l][l]=A[l][l]-sum;
-		if(U[l][l]<1e-8) return false;
-	}
-	return true;
-}
 
 void d2DArray::transpose(){
 	double aux;
@@ -420,7 +409,6 @@ bool d2DArray::GaussSiedel(double*b, double*x, int iters){
 		error=norm_2(errorVect, cols);
 		cont++;
 	}while(error>1e-5 && cont<iters);
-	std::cout << cont << "\n";
 	delete[] errorVect;
 	return true;
 }
@@ -457,6 +445,69 @@ bool d2DArray::Jacobi(double*b, double*x, int iters){
 	return true;
 }
 
+bool d2DArray::factLU(d2DArray&L, d2DArray& U){
+	L.setShape(rows, cols);
+	U.setShape(rows, cols);
+	L.setform('L');
+	U.setform('U');
+	for(int l=0; l<rows; l++){
+		double sum=0;
+		for(int i=0; i<l; i++){
+			for(int k=0; k<i; k++) sum+=L[i][k]*U[k][l];
+			U[i][l]=A[i][l]-sum;
+			L[i][l]=0.0;
+		}
+		sum=0;
+		for(int j=0; j<l; j++){
+			for(int k=0; k<j; k++) sum+=L[l][k]*U[k][j];
+			L[l][j]=(A[l][j]-sum)/U[j][j];
+			U[l][j]=0.0;
+		}
+		sum=0;
+		for(int k=0; k<l; k++) sum+=L[l][k]*U[k][l];
+		L[l][l]=1;
+		U[l][l]=A[l][l]-sum;
+		if(U[l][l]<1e-8) return false;
+	}
+	return true;
+}
+
+bool d2DArray::factPLU(int*& p, d2DArray &L, d2DArray& U){
+	L.setShape(rows, cols);
+	L.setform('L');
+	for(int i=0; i<rows; i++){
+		for(int j=0; j<cols; j++) L[i][j]=0;
+	}
+	U=*(this->copy());
+	U.setform('U');
+	p=new int[rows];
+	for(int i=0; i<rows; i++) p[i]=i;
+	for(int l=0; l<rows-1; l++){
+		double maxi=fabs(U[l][l]);
+		int maxIndex=l;
+		for(int i=l+1; i<rows; i++){
+			if(fabs(U[i][l])>maxi){
+				maxi=fabs(U[i][l]);
+				maxIndex=i;
+			}
+		}
+		if(maxIndex!=l){
+			U.swapRows(maxIndex,l);
+			L.swapRows(maxIndex,l);
+			int aux=p[maxIndex];
+			p[maxIndex]=p[l];
+			p[l]=aux;
+		}
+		for(int i=l+1; i<rows; i++){
+			double factor=-U[i][l]/U[l][l];
+			U.addOwnRows(l,i, factor);
+			L[i][l]=-factor;
+		}
+	}
+	for(int i=0; i<L.getrows(); i++) L[i][i]++;
+	return true;
+}
+
 double d2DArray::powerMax(){
 	double* xlast=new double[1], *x=new double[cols];
 	for(int i=0; i<cols; i++) x[i]=0;
@@ -488,10 +539,15 @@ double d2DArray::powerMax(){
 double d2DArray::powerMin(){
 	double* xlast=new double[cols], *x=new double[cols];
 	double* xlastCopy=new double[cols];
+	double* xmid=new double[cols];
+	double* xlastPerm=new double[cols];
 	for(int i=0; i<cols; i++) x[i]=0;
 	x[0]=1;
 	double now=0;
 	double last;
+	d2DArray L, U;
+	int* p;
+	this->factPLU(p,L,U);
 	do{
         double aux=0;
         for(int i=0; i<cols; i++) aux+=x[i]*x[i];
@@ -499,13 +555,10 @@ double d2DArray::powerMin(){
         for(int i=0; i<cols; i++) x[i]/=aux;
 		double* auxAp=xlast;
         xlast=x;
-		for(int i=0; i<cols; i++)xlastCopy[i]=xlast[i];
 		x=auxAp;
-		d2DArray C;
-		C=*(this->copy());
-		C.setpivoteo(true);
-        C.solve(xlastCopy, x);
-		double *xans=this->operator*(x);
+		for(int i=0; i<cols; i++) xlastPerm[i]=xlast[p[i]];
+		L.solve(xlastPerm, xmid);
+		U.solve(xmid, x);
         last=now;
         now=0;
         aux=0;
